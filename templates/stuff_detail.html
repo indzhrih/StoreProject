@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %} 
+	<div class="card mb-3 text-center text-muted " style="max-width: 80%;">
+	    <div class="row g-0">
+	    	<div class="col-md-4">
+	      		<img src="/media/{{ stuff.image }}" class="img-fluid rounded-start" alt="Stuff image">
+	    	</div>
+	    	<div class="col-md-8">
+	      		<div class="card-body">
+	        		<h5 class="card-title">{{ stuff.title }}</h5>
+	        		<p class="card-text">{{ stuff.body }}</p>
+	      		</div>
+	    	</div>
+	    </div>
+	    <div class="card-header d-flex justify-content-end">
+			<ul class="nav nav-pills card-header-pills ">
+ 				<li class="nav-item px-2">
+    				<p>Price: {{ stuff.price }}$</p>
+  				</li>
+  				<li class="nav-item px-2">
+    				<a class="btn btn-light" href="#">Add</a>
+  				</li>
+  				<li class="nav-item px-2">
+    				<a class="btn btn-primary" href="{% url 'stuff_update' stuff.pk%}">Update</a>
+  				</li>
+   				<li class="nav-item px-2">
+    				<a class="btn btn-danger" href="{% url 'stuff_delete' stuff.pk%}">Delete</a>
+  				</li>
+			</ul>
+		</div>
+	</div>
+{% endblock %}

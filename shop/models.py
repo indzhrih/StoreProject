@@ -1,5 +1,8 @@
 from django.db import models
 from django.urls import reverse
+from django.conf import settings
+
+User = settings.AUTH_USER_MODEL
 
 class Stuff(models.Model):
 	title = models.CharField(max_length = 255)
@@ -14,12 +17,18 @@ class Stuff(models.Model):
 		return reverse('stuff_list')
 
 class Cart(models.Model):
-	total = models.DecimalField(max_digits = 5, decimal_places = 2)
-	stuff = models.ManyToManyField(Stuff)
-	quantity = models.IntegerField()
+	user = models.OneToOneField(User, on_delete=models.CASCADE)
+	total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
 class CartItem(models.Model):
-    stuff = models.ForeignKey(Stuff, on_delete=models.CASCADE)
-    stuff_quantity = models.IntegerField(default=0)
+	cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+	stuff = models.ForeignKey(Stuff, on_delete=models.CASCADE)
+	quantity = models.PositiveIntegerField(default=1)
+
+	def __str__(self):
+		return f"{self.quantity} x {self.stuff.title}"
+
+	def total_price(self):
+		return self.quantity * self.stuff.price
 
 # Create your models here.

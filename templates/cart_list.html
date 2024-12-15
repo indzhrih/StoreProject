@@ -25,12 +25,9 @@
 	      				<li class="nav-item px-2">
 	        				<p>Quantity: {{ item.quantity }}</p>
 	      				</li>
-	      				<li class="nav-item px-2">
-	        				<a class="btn btn-primary" href="#">Update</a>
-	      				</li>
-	       				<li class="nav-item px-2">
-	        				<a class="btn btn-danger" href="#">Delete</a>
-	      				</li>
+       				<li class="nav-item px-2">
+        				<a class="btn btn-danger" href="{% url 'cart_delete' item.pk %}">Delete</a>
+      				</li>
 	    			</ul>
 	  			</div>
 			</div>

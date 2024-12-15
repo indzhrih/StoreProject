@@ -6,6 +6,7 @@ from django.views.generic.edit import UpdateView, DeleteView, CreateView
 from django.urls import reverse,  reverse_lazy
 from django.db import IntegrityError
 from .models import Stuff, Cart, CartItem
+from django.contrib import messages
 from . import models
 
 class StuffListView(LoginRequiredMixin, ListView):
@@ -57,6 +58,12 @@ class CartListView(ListView):
         context['total_amount'] = cart.total
         return context
 
+class CartDeleteView(LoginRequiredMixin, DeleteView):
+	model = models.Stuff
+	template_name = 'cart_delete.html'
+	success_url = reverse_lazy('cart')
+	login_url = 'login'
+
 def cart_add(request, stuff_id):
     if request.method == 'POST':
         item = get_object_or_404(Stuff, pk=stuff_id)
@@ -73,5 +80,21 @@ def cart_add(request, stuff_id):
 
         cart.total = sum(item.total_price() for item in cart.items.all())
         cart.save()
+ 
+        return redirect('cart')
 
+def cart_item_delete(request, pk):
+    try:
+        cart_item = CartItem.objects.get(pk=pk, cart__user=request.user)
+        cart_item.delete()
+        cart = cart_item.cart
+        cart.total = CartItem.objects.filter(cart=cart).aggregate(total=models.Sum(models.F('quantity') * models.F('stuff__price')))['total'] or 0.00
+        cart.save()
+        messages.success(request, "Товар успешно удален из корзины.")
+        return redirect('cart')
+    except CartItem.DoesNotExist:
+        messages.warning(request, "Товар уже удален или не существует.")
+        return redirect('cart')
+    except Exception as e:
+        messages.error(request, f"Ошибка при удалении товара: {str(e)}")
         return redirect('cart')

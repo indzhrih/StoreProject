@@ -3,7 +3,7 @@
 {% block title %}Stuff{% endblock %}
 
 {% block content %}
-	{% for stuff in object_list %}
+	{% for cartitem in object_list %}
 		<div class="card mb-3 text-center text-muted border-dark mb-3 g-4" >
 		    <div class="row g-0">
 		    	<div class="col-md-4">
@@ -11,21 +11,24 @@
 		    	</div>
 		    	<div class="col-md-8">
 		      		<div class="card-body">
-		        		<h5 class="card-title">{{ stuff.title }}</h5>
-		        		<p class="card-text">{{ stuff.body }}</p>
+		        		<h5 class="card-title">{{ cartitem.stuff.title }}</h5>
+		        		<p class="card-text">{{ cartitem.stuff.body }}</p>
 		      		</div>
 		    	</div>
 		    </div>
 		    <div class="card-header d-flex justify-content-end">
     			<ul class="nav nav-pills card-header-pills ">
      				<li class="nav-item px-2">
-        				<p>Price: {{ stuff.price }}$</p>
+        				<p>Price: {{ cartitem.stuff.price }}$</p>
       				</li>
       				<li class="nav-item px-2">
-        				<a class="btn btn-primary" href="{% url 'stuff_update' stuff.pk %}">Update</a>
+        				<p>Quantity</p>
+      				</li>
+      				<li class="nav-item px-2">
+        				<a class="btn btn-primary" href="#">Update</a>
       				</li>
        				<li class="nav-item px-2">
-        				<a class="btn btn-danger" href="{% url 'stuff_delete' stuff.pk %}">Delete</a>
+        				<a class="btn btn-danger" href="#">Delete</a>
       				</li>
     			</ul>
   			</div>

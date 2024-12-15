@@ -13,4 +13,13 @@ class Stuff(models.Model):
 	def get_absolute_url(self):
 		return reverse('stuff_list')
 
+class Cart(models.Model):
+	total = models.DecimalField(max_digits = 5, decimal_places = 2)
+	stuff = models.ManyToManyField(Stuff)
+	quantity = models.IntegerField()
+
+class CartItem(models.Model):
+    stuff = models.ForeignKey(Stuff, on_delete=models.CASCADE)
+    stuff_quantity = models.IntegerField(default=0)
+
 # Create your models here.

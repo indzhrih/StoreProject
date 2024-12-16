@@ -42,20 +42,27 @@ class StuffCreateView(LoginRequiredMixin, CreateView):
 		form.instance.author = self.request.user
 		return super().form_valid(form)
 
-class CartListView(ListView):
+class CartListView(LoginRequiredMixin, ListView):
     model = CartItem
     template_name = 'cart_list.html'
     context_object_name = 'cart_items'
     login_url = 'login'
 
     def get_queryset(self):
-        cart = Cart.objects.get(user=self.request.user)
-        return cart.items.all()
+        try:
+            cart = Cart.objects.get(user=self.request.user)
+            return cart.items.all()
+        except Cart.DoesNotExist:
+            Cart.objects.create(user=self.request.user)  
+            return CartItem.objects.none()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        cart = Cart.objects.get(user=self.request.user)
-        context['total_amount'] = cart.total
+        try:
+            cart = Cart.objects.get(user=self.request.user)
+            context['total_amount'] = cart.total
+        except Cart.DoesNotExist:
+            context['total_amount'] = 0.00 
         return context
 
 class CartDeleteView(LoginRequiredMixin, DeleteView):
@@ -65,23 +72,26 @@ class CartDeleteView(LoginRequiredMixin, DeleteView):
 	login_url = 'login'
 
 def cart_add(request, stuff_id):
-    if request.method == 'POST':
-        item = get_object_or_404(Stuff, pk=stuff_id)
-        quantity = int(request.POST.get('quantity', 1))
+	if request.method == 'POST':
+	    try:
+	        item = get_object_or_404(Stuff, pk=stuff_id)
+	        quantity = int(request.POST.get('quantity', 1))
 
-        cart, created = Cart.objects.get_or_create(user=request.user)
+	        cart, created = Cart.objects.get_or_create(user=request.user)
 
-        cart_item, created = cart.items.get_or_create(stuff=item)
-        if created:
-            cart_item.quantity = quantity
-        else:
-            cart_item.quantity += quantity
-        cart_item.save()
+	        cart_item, created = cart.items.get_or_create(stuff=item)
+	        if created:
+	            cart_item.quantity = quantity
+	        else:
+	            cart_item.quantity += quantity
+	        cart_item.save()
 
-        cart.total = sum(item.total_price() for item in cart.items.all())
-        cart.save()
- 
-        return redirect('cart')
+	        cart.total = sum(item.total_price() for item in cart.items.all())
+	        cart.save()
+	    except Cart.DoesNotExist:
+	        return CartItem.objects.none()
+
+	    return redirect('cart')
 
 def cart_item_delete(request, pk):
     try:
@@ -98,3 +108,7 @@ def cart_item_delete(request, pk):
     except Exception as e:
         messages.error(request, f"Ошибка при удалении товара: {str(e)}")
         return redirect('cart')
+
+def create_cart(sender, instance, created, **kwargs):
+    if created:
+        Cart.objects.create(user=instance)
